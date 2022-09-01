@@ -62,6 +62,9 @@ DATABASES = {
     }
 }
 
+ELASTICSEARCH_URL = config('ELASTICSEARCH_URL')
+ELASTICSEARCH_TIMEOUT = config('ELASTICSEARCH_TIMEOUT', cast=int, default=20)
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
