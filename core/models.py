@@ -1,10 +1,13 @@
 from uuid import uuid4
+from datetime import datetime
 
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.base_user import BaseUserManager
 from django.utils.translation import ugettext_lazy as _
+
+from elasticsearch_dsl import Document, Date, Keyword, Text, Integer, Byte, Ip
 
 
 class UserManager(BaseUserManager):
@@ -90,3 +93,80 @@ class APIKey(models.Model):
         db_table = 'api_keys'
         verbose_name = _('API Key')
         verbose_name_plural = _('API Keys')
+
+
+class GeneralLog(Document):
+    user_id = Keyword()
+    project_uuid = Keyword()
+    project_slug = Keyword()
+    absolute_uri = Text()
+    event_type = Keyword()
+    route = Text()
+    created_time = Date()
+
+    client_rate = Byte()
+    client_comment = Text()
+
+    client_uuid = Keyword()
+    client_device_type = Keyword()
+    client_platform = Text()
+    client_public_ip_address = Ip()
+    client_os = Text()
+    client_os_version = Text()
+    client_build = Text()
+    client_browser = Text()
+    client_browser_version = Text()
+    client_language = Text()
+    client_screen_size = Text()
+    client_document_referrer = Text()
+    client_timezone = Text()
+    client_timezone_offset = Text()
+    client_timestamp = Integer()
+
+    class Index:
+        name = 'general-logs'
+
+    def save(self, **kwargs):
+        self.created_time = datetime.now()
+        return super().save(**kwargs)
+
+
+class ComponentLog(Document):
+    user_id = Keyword()
+    project_uuid = Keyword()
+    project_slug = Keyword()
+    absolute_uri = Text()
+    event_type = Keyword()
+    route = Text()
+    created_time = Date()
+
+    component_id = Keyword()
+    component_type = Keyword()
+    component_name = Keyword()
+    component_inner_text = Text()
+
+    client_rate = Byte()
+    client_comment = Text()
+
+    client_uuid = Keyword()
+    client_device_type = Keyword()
+    client_platform = Text()
+    client_public_ip_address = Ip()
+    client_os = Text()
+    client_os_version = Text()
+    client_build = Text()
+    client_browser = Text()
+    client_browser_version = Text()
+    client_language = Text()
+    client_screen_size = Text()
+    client_document_referrer = Text()
+    client_timezone = Text()
+    client_timezone_offset = Text()
+    client_timestamp = Integer()
+
+    class Index:
+        name = 'components-logs'
+
+    def save(self, **kwargs):
+        self.created_time = datetime.now()
+        return super().save(**kwargs)
