@@ -1,8 +1,8 @@
 from uuid import uuid4
-from datetime import datetime
 
 from django.db import models
 from django.conf import settings
+from django.utils import timezone
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.base_user import BaseUserManager
 from django.utils.translation import ugettext_lazy as _
@@ -79,6 +79,9 @@ class Project(models.Model):
         verbose_name = _('Project')
         verbose_name_plural = _('Projects')
 
+    def __str__(self):
+        return self.slug
+
     @staticmethod
     def get_project_object(project_uuid):
         if not project_uuid:
@@ -105,6 +108,9 @@ class KibanaAccess(models.Model):
         verbose_name = _('Kibana Access')
         verbose_name_plural = _('Kibana Accesses')
 
+    def __str__(self):
+        return self.username
+
 
 class APIKey(models.Model):
     user = models.ForeignKey(verbose_name=_('User'), to=settings.AUTH_USER_MODEL,
@@ -121,6 +127,9 @@ class APIKey(models.Model):
         db_table = 'api_keys'
         verbose_name = _('API Key')
         verbose_name_plural = _('API Keys')
+
+    def __str__(self):
+        return str(self.user_id)
 
     @staticmethod
     def get_user_object(api_key):
@@ -166,7 +175,7 @@ class GeneralLog(Document):
         name = 'general-logs'
 
     def save(self, **kwargs):
-        self.created_time = datetime.now()
+        self.created_time = timezone.now()
         return super().save(**kwargs)
 
 
@@ -207,5 +216,5 @@ class ComponentLog(Document):
         name = 'components-logs'
 
     def save(self, **kwargs):
-        self.created_time = datetime.now()
+        self.created_time = timezone.now()
         return super().save(**kwargs)
