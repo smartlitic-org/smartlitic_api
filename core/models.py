@@ -10,6 +10,16 @@ from django.utils.translation import ugettext_lazy as _
 from elasticsearch_dsl import Document, Date, Keyword, Text, Integer, Byte, Ip
 
 
+class AvailableAPIKeyManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(is_revoked=False)
+
+
+class AvailableProjectManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(is_enable=True)
+
+
 class UserManager(BaseUserManager):
     use_in_migrations = True
 
@@ -57,13 +67,28 @@ class Project(models.Model):
     slug = models.SlugField(verbose_name=_('Slug'), max_length=32, unique=True)
     description = models.TextField(verbose_name=_('Description'), blank=True)
     website = models.URLField(verbose_name=_('Website'), blank=True)
+    is_enable = models.BooleanField(verbose_name=_('Is Enable'), default=True)
     created_time = models.DateTimeField(verbose_name=_('Created Time'), auto_now_add=True)
     updated_time = models.DateTimeField(verbose_name=_('Updated Time'), auto_now=True)
+
+    objects = models.Manager()
+    available_objects = AvailableProjectManager()
 
     class Meta:
         db_table = 'projects'
         verbose_name = _('Project')
         verbose_name_plural = _('Projects')
+
+    @staticmethod
+    def get_project_object(project_uuid):
+        if not project_uuid:
+            return None
+        try:
+            project = Project.available_objects.get(project_uuid=project_uuid)
+        except Project.DoesNotExist:
+            return None
+        else:
+            return project
 
 
 class KibanaAccess(models.Model):
@@ -84,15 +109,29 @@ class KibanaAccess(models.Model):
 class APIKey(models.Model):
     user = models.ForeignKey(verbose_name=_('User'), to=settings.AUTH_USER_MODEL,
                              on_delete=models.CASCADE, related_name='api_keys')
-    api_key = models.CharField(verbose_name=_('API Key'), max_length=64, unique=True)
+    api_key = models.CharField(verbose_name=_('API Key'), max_length=settings.API_KEY_LENGTH, unique=True)
     is_revoked = models.BooleanField(verbose_name=_('Is Revoked'), default=False)
     created_time = models.DateTimeField(verbose_name=_('Created Time'), auto_now_add=True)
     updated_time = models.DateTimeField(verbose_name=_('Updated Time'), auto_now=True)
+
+    objects = models.Manager()
+    available_objects = AvailableAPIKeyManager()
 
     class Meta:
         db_table = 'api_keys'
         verbose_name = _('API Key')
         verbose_name_plural = _('API Keys')
+
+    @staticmethod
+    def get_user_object(api_key):
+        if not api_key:
+            return None
+        try:
+            api_key_obj = APIKey.available_objects.get(api_key=api_key)
+        except APIKey.DoesNotExist:
+            return None
+        else:
+            return api_key_obj.user
 
 
 class GeneralLog(Document):
