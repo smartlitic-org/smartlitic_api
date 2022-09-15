@@ -188,7 +188,6 @@ class ComponentLog(Document):
 
     component_id = Keyword()
     component_type = Keyword()
-    component_name = Keyword()
     component_inner_text = Text()
 
     client_rate = Byte()
