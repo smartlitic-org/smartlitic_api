@@ -143,7 +143,7 @@ class APIKey(models.Model):
             return api_key_obj.user
 
 
-class GeneralLog(Document):
+class BaseLogDocument(Document):
     user_id = Keyword()
     project_uuid = Keyword()
     project_slug = Keyword()
@@ -169,47 +169,24 @@ class GeneralLog(Document):
     client_timezone_offset = Float()
     client_timestamp = Integer()
 
-    class Index:
-        name = 'general-logs'
-
     def save(self, **kwargs):
         self.created_time = timezone.now()
+        kwargs['index'] = f'{self.base_index_name}-{self.user_id}-{self.project_uuid}'
         return super().save(**kwargs)
 
 
-class ComponentLog(Document):
-    user_id = Keyword()
-    project_uuid = Keyword()
-    project_slug = Keyword()
-    absolute_url = Text()
-    event_type = Keyword()
-    route = Text()
-    created_time = Date()
+class GeneralLog(BaseLogDocument):
+    base_index_name = 'general-logs'
+    class Index:
+        name = 'general-logs-*-*'
+
+
+class ComponentLog(BaseLogDocument):
+    base_index_name = 'components-logs'
 
     component_id = Keyword()
     component_type = Keyword()
     component_inner_text = Text()
 
-    client_rate = Byte()
-    client_comment = Text()
-
-    client_uuid = Keyword()
-    client_device_type = Keyword()
-    client_platform = Text()
-    client_public_ip_address = Ip()
-    client_os = Text()
-    client_browser = Text()
-    client_browser_version = Text()
-    client_language = Text()
-    client_screen_size = Text()
-    client_document_referrer = Text()
-    client_timezone = Text()
-    client_timezone_offset = Float()
-    client_timestamp = Integer()
-
     class Index:
-        name = 'components-logs'
-
-    def save(self, **kwargs):
-        self.created_time = timezone.now()
-        return super().save(**kwargs)
+        name = 'components-logs-*-*'
