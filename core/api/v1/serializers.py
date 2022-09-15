@@ -6,8 +6,8 @@ from core.models import GeneralLog, ComponentLog
 class ComponentSerializer(serializers.Serializer):
     component_id = serializers.SlugField()
     component_type = serializers.SlugField()
-    component_name = serializers.SlugField()
-    component_inner_text = serializers.CharField()
+    component_name = serializers.SlugField(default='')
+    component_inner_text = serializers.CharField(default='')
 
     def create(self, validated_data):
         pass
@@ -33,7 +33,7 @@ class LoggerLoadCompleteSerializer(serializers.Serializer):
     client_screen_size = serializers.CharField(default='')
     client_document_referrer = serializers.CharField(default='')
     client_timezone = serializers.CharField(default='')
-    client_timezone_offset = serializers.CharField(default='')
+    client_timezone_offset = serializers.FloatField(default=None)
     client_timestamp = serializers.IntegerField()
 
     def validate(self, attrs):

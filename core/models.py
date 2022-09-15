@@ -7,7 +7,7 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.base_user import BaseUserManager
 from django.utils.translation import ugettext_lazy as _
 
-from elasticsearch_dsl import Document, Date, Keyword, Text, Integer, Byte, Ip
+from elasticsearch_dsl import Document, Date, Keyword, Text, Integer, Byte, Float, Ip
 
 
 class AvailableAPIKeyManager(models.Manager):
@@ -166,7 +166,7 @@ class GeneralLog(Document):
     client_screen_size = Text()
     client_document_referrer = Text()
     client_timezone = Text()
-    client_timezone_offset = Text()
+    client_timezone_offset = Float()
     client_timestamp = Integer()
 
     class Index:
@@ -205,7 +205,7 @@ class ComponentLog(Document):
     client_screen_size = Text()
     client_document_referrer = Text()
     client_timezone = Text()
-    client_timezone_offset = Text()
+    client_timezone_offset = Float()
     client_timestamp = Integer()
 
     class Index:
