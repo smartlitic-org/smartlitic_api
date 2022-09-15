@@ -6,15 +6,15 @@ from core.models import ComponentLog
 
 from utils.connectors import ElasticsearchConnector
 
-from .serializers import LoggerClickSerializer
+from .serializers import LoggerLoadCompleteSerializer
 
 elasticsearch_connector = ElasticsearchConnector()
 
 
-class LoggerClickView(APIView):
+class LoggerLoadCompleteView(APIView):
     authentication_classes = [LoggerAuthentication]
-    serializer_class = LoggerClickSerializer
-    event_type = 'CLICK'
+    serializer_class = LoggerLoadCompleteSerializer
+    event_type = 'LOAD_COMPLETE'
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)

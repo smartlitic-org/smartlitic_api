@@ -1,8 +1,8 @@
 from django.urls import path
 
-from .views import LoggerClickView
+from .views import LoggerLoadCompleteView
 
 
 urlpatterns = [
-    path('click/', LoggerClickView.as_view(), name='click-logger'),
+    path('load-complete/', LoggerLoadCompleteView.as_view(), name='load-complete-logger'),
 ]

@@ -16,10 +16,10 @@ class ComponentSerializer(serializers.Serializer):
         pass
 
 
-class LoggerClickSerializer(serializers.Serializer):
+class LoggerLoadCompleteSerializer(serializers.Serializer):
     component = ComponentSerializer(required=False)
 
-    absolute_uri = serializers.CharField(default='')
+    absolute_url = serializers.CharField(default='')
     route = serializers.CharField(default='')
 
     client_uid = serializers.SlugField()
@@ -27,8 +27,6 @@ class LoggerClickSerializer(serializers.Serializer):
     client_platform = serializers.CharField(default='')
     client_public_ip_address = serializers.IPAddressField(default=None)
     client_os = serializers.CharField(default='')
-    client_os_version = serializers.CharField(default='')
-    client_build = serializers.CharField(default='')
     client_browser = serializers.CharField(default='')
     client_browser_version = serializers.CharField(default='')
     client_language = serializers.CharField(default='')
