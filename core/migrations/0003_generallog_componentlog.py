@@ -1,19 +1,21 @@
 from django.db import migrations
 
 from core.models import GeneralLog, ComponentLog
+
 from utils.connectors import ElasticsearchConnector
+from utils.elasticsearch import save_index_template_as_composable
 
 
 def initial_general_logs_index_template(apps, schema_editor):
     elasticsearch_connector = ElasticsearchConnector()
-    general_logs = GeneralLog._index.as_template(GeneralLog.base_index_name, order=0)
-    general_logs.save(using=elasticsearch_connector.get_connection())
+    general_logs_template = GeneralLog._index.as_template(GeneralLog.base_index_name, order=0)
+    save_index_template_as_composable(general_logs_template, elasticsearch_connector.get_connection())
     return True
 
 def initial_component_logs_index_template(apps, schema_editor):
     elasticsearch_connector = ElasticsearchConnector()
-    components_logs = ComponentLog._index.as_template(ComponentLog.base_index_name, order=0)
-    components_logs.save(using=elasticsearch_connector.get_connection())
+    components_logs_template = ComponentLog._index.as_template(ComponentLog.base_index_name, order=0)
+    save_index_template_as_composable(components_logs_template, elasticsearch_connector.get_connection())
     return True
 
 
