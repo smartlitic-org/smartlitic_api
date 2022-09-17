@@ -29,7 +29,7 @@ class LoggerBaseSerializer(serializers.Serializer):
     absolute_url = serializers.CharField(default='', allow_blank=True)
     route = serializers.CharField(default='', allow_blank=True)
 
-    client_uid = serializers.SlugField()
+    client_uuid = serializers.SlugField()
     client_device_type = serializers.ChoiceField(default='', choices=['DESKTOP', 'MOBILE', 'TABLET'], allow_blank=True)
     client_platform = serializers.CharField(default='', allow_blank=True)
     client_public_ip_address = serializers.IPAddressField(default=None, allow_null=True)
