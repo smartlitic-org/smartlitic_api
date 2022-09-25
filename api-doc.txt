@@ -1,0 +1,77 @@
+Smartlitic APIs Documentation
+
+
+- Logger Load Complete Event
+
+  URI: /logger/v1/load-complete/
+  METHOD: POST
+  CONTENT_TYPE: application/json
+  HEADERS:
+    *API-KEY -> (str)
+    *PROJECT-ID -> (str of uuid)
+  BODY:
+    *client_uuid -> Client Fingerprint ID (str)
+    *client_timestamp -> (int)
+     absolute_url -> (str) default: ''
+     route -> (str) default: ''
+     client_device_type -> (str of choices) choices are [DESKTOP/MOBILE/TABLET] default: ''
+     client_platform -> (str) default: ''
+     client_public_ip_address -> (str of ipv4) (format is *.*.*.*) default: null
+     client_os -> (str) default: ''
+     client_browser -> (str) default: ''
+     client_browser_version -> (str) default: ''
+     client_language -> (str) default: ''
+     client_screen_size -> (str) default: ''
+     client_document_referrer -> (str) default: ''
+     client_timezone -> (str) default: ''
+     client_timezone_offset -> (float) default: null
+     component -> (Component Object) default: null
+  }
+  NOTES:
+    -Required parameters (those have * mark) should send
+    -If `component` parameter set, log will assumed to be `component-log`; default is `general-log`
+    -In `component` object either `component_id` or `component_inner_text` should send
+  Component Object: {
+     *component_type -> (str of element's tag name like `BUTTON`, `A` etc.)
+      component_id -> (str of element's ID)
+      component_inner_text -> (str of element's inner text)
+  }
+
+
+- Logger Rate Event
+
+  URI: /logger/v1/rate/
+  METHOD: POST
+  CONTENT_TYPE: application/json
+  HEADERS:
+    *API-KEY -> (str)
+    *PROJECT-ID -> (str of uuid)
+  BODY:
+    *client_uuid -> Client Fingerprint ID (str)
+    *client_timestamp -> (int)
+    *client_rate -> (int) choices are [1/2/3/4/5]
+     client_comment -> (str) default: ''
+     absolute_url -> (str) default: ''
+     route -> (str) default: ''
+     client_device_type -> (str of choices) choices are [DESKTOP/MOBILE/TABLET] default: ''
+     client_platform -> (str) default: ''
+     client_public_ip_address -> (str of ipv4) (format is *.*.*.*) default: null
+     client_os -> (str) default: ''
+     client_browser -> (str) default: ''
+     client_browser_version -> (str) default: ''
+     client_language -> (str) default: ''
+     client_screen_size -> (str) default: ''
+     client_document_referrer -> (str) default: ''
+     client_timezone -> (str) default: ''
+     client_timezone_offset -> (float) default: null
+     component -> (Component Object) default: null
+  }
+  NOTES:
+    -Required parameters (those have * mark) should send
+    -If `component` parameter set, log will assumed to be `component-log`; default is `general-log`
+    -In `component` object either `component_id` or `component_inner_text` should send
+  Component Object: {
+     *component_type -> (str of element's tag name like `BUTTON`, `A` etc.)
+      component_id -> (str of element's ID)
+      component_inner_text -> (str of element's inner text)
+  }
