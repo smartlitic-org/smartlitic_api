@@ -95,7 +95,7 @@ STATIC_URL = '/static/'
 AUTH_USER_MODEL = 'core.User'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CORS_ORIGIN_ALLOW_ALL = True
+CORS_ORIGIN_ALLOW_ALL = config('CORS_ORIGIN_ALLOW_ALL', cast=bool, default=False)
 CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', cast=Csv(), default=',')
 
 API_KEY_LENGTH = 64
