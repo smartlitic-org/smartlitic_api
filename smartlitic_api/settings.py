@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from decouple import config, Csv
+from corsheaders.defaults import default_headers
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -95,9 +96,11 @@ STATIC_URL = '/static/'
 AUTH_USER_MODEL = 'core.User'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CORS_ORIGIN_ALLOW_ALL = config('CORS_ORIGIN_ALLOW_ALL', cast=bool, default=False)
-CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', cast=Csv(), default=',')
-
 API_KEY_LENGTH = 64
 API_KEY_HEADER_PARAM_NAME = 'API-KEY'
 PROJECT_UUID_HEADER_PARAM_NAME = 'PROJECT-ID'
+
+
+CORS_ORIGIN_ALLOW_ALL = config('CORS_ORIGIN_ALLOW_ALL', cast=bool, default=False)
+CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', cast=Csv(), default=',')
+CORS_ALLOW_HEADERS = list(default_headers) + [PROJECT_UUID_HEADER_PARAM_NAME]
