@@ -7,7 +7,7 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.base_user import BaseUserManager
 from django.utils.translation import ugettext_lazy as _
 
-from elasticsearch_dsl import Document, Date, Keyword, Text, Integer, Byte, Float, Ip
+from elasticsearch_dsl import Document, Date, Keyword, Text, Integer, Byte, Float, Ip, Long
 
 
 class AvailableAPIKeyManager(models.Manager):
@@ -167,7 +167,7 @@ class BaseLogDocument(Document):
     client_document_referrer = Text()
     client_timezone = Text()
     client_timezone_offset = Float()
-    client_timestamp = Integer()
+    client_timestamp = Long()
 
     def save(self, **kwargs):
         self.created_time = timezone.now()
