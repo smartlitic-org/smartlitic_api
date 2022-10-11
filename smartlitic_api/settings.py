@@ -22,8 +22,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
-
-    'core.apps.CoreConfig',
+    
+    'users.apps.UsersConfig',
+    'logger.apps.LoggerConfig',
 ]
 
 MIDDLEWARE = [
@@ -94,7 +95,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-AUTH_USER_MODEL = 'core.User'
+AUTH_USER_MODEL = 'users.User'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 API_KEY_LENGTH = 64

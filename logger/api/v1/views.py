@@ -1,10 +1,9 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from core.auth import LoggerAuthentication
-from core.models import ComponentLog
-
+from smartlitic_api.auth import SDKAuthentication
 from utils.connectors import ElasticsearchConnector
+from logger.models import LoggerModel
 
 from .serializers import LoggerLoadCompleteSerializer, LoggerRateSerializer
 
@@ -12,7 +11,7 @@ elasticsearch_connector = ElasticsearchConnector()
 
 
 class LoggerBaseView(APIView):
-    authentication_classes = [LoggerAuthentication]
+    authentication_classes = [SDKAuthentication]
 
     def extra_params(self, request):
         return {
@@ -26,17 +25,17 @@ class LoggerBaseView(APIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        target_log_model = serializer.validated_data.pop('target_log_model')
+        log_type = serializer.validated_data.get('log_type')
 
         log_data = {
             **self.extra_params(request),
             **serializer.validated_data,
         }
-        if target_log_model is ComponentLog:
+        if log_type == 'COMPONENT':
             log_data.update(**log_data['component'])
             del log_data['component']
 
-        log = target_log_model(**log_data)
+        log = LoggerModel(**log_data)
         log.save(using=elasticsearch_connector.get_connection())
 
         return Response()

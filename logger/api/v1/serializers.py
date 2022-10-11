@@ -3,8 +3,6 @@ from rest_framework.exceptions import ValidationError
 
 from django.utils.translation import ugettext_lazy as _
 
-from core.models import GeneralLog, ComponentLog
-
 
 class ComponentSerializer(serializers.Serializer):
     component_id = serializers.SlugField(default='')
@@ -44,7 +42,7 @@ class LoggerBaseSerializer(serializers.Serializer):
     client_timestamp = serializers.IntegerField()
 
     def validate(self, attrs):
-        attrs['target_log_model'] = ComponentLog if attrs.get('component') else GeneralLog
+        attrs['log_type'] = 'COMPONENT' if attrs.get('component') else 'GENERAL'
         return attrs
 
 

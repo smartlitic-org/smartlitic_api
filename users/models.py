@@ -2,12 +2,9 @@ from uuid import uuid4
 
 from django.db import models
 from django.conf import settings
-from django.utils import timezone
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.base_user import BaseUserManager
 from django.utils.translation import ugettext_lazy as _
-
-from elasticsearch_dsl import Document, Date, Keyword, Text, Integer, Byte, Float, Ip, Long
 
 
 class AvailableAPIKeyManager(models.Manager):
@@ -141,52 +138,3 @@ class APIKey(models.Model):
             return None
         else:
             return api_key_obj.user
-
-
-class BaseLogDocument(Document):
-    user_id = Keyword()
-    project_uuid = Keyword()
-    project_slug = Keyword()
-    absolute_uri = Text()
-    event_type = Keyword()
-    route = Text()
-    created_time = Date()
-
-    client_rate = Byte()
-    client_comment = Text()
-
-    client_uuid = Keyword()
-    client_device_type = Keyword()
-    client_platform = Text()
-    client_public_ip_address = Ip()
-    client_os = Text()
-    client_browser = Text()
-    client_browser_version = Text()
-    client_language = Text()
-    client_screen_size = Text()
-    client_document_referrer = Text()
-    client_timezone = Text()
-    client_timezone_offset = Float()
-    client_timestamp = Long()
-
-    def save(self, **kwargs):
-        self.created_time = timezone.now()
-        kwargs['index'] = f'{self.base_index_name}-{self.user_id}-{self.project_uuid}'
-        return super().save(**kwargs)
-
-
-class GeneralLog(BaseLogDocument):
-    base_index_name = 'general-logs'
-    class Index:
-        name = 'general-logs-*-*'
-
-
-class ComponentLog(BaseLogDocument):
-    base_index_name = 'components-logs'
-
-    component_id = Keyword()
-    component_type = Keyword()
-    component_inner_text = Text()
-
-    class Index:
-        name = 'components-logs-*-*'

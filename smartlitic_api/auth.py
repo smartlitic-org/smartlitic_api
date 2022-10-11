@@ -6,7 +6,7 @@ from django.conf import settings
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 
-from core.models import APIKey, Project
+from users.models import APIKey, Project
 
 
 def get_api_key_from_header(request_header):
@@ -30,7 +30,7 @@ def is_valid_api_key(api_key):
     return len(api_key) == settings.API_KEY_LENGTH
 
 
-class LoggerAuthentication(BaseAuthentication):
+class SDKAuthentication(BaseAuthentication):
     def authenticate(self, request, **kwargs):
         api_key = get_api_key_from_header(request.headers)
         project_uuid = get_project_uuid_from_header(request.headers)

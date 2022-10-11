@@ -2,8 +2,8 @@ from django.apps import AppConfig
 from django.utils.translation import ugettext_lazy as _
 
 
-class CoreConfig(AppConfig):
+class LoggerConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'core'
-    verbose_name = _('Core')
-    verbose_name_plural = _('Core')
+    name = 'logger'
+    verbose_name = _('Logger')
+    verbose_name_plural = _('Logger')
