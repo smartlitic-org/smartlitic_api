@@ -1,3 +1,4 @@
+from datetime import timedelta
 from pathlib import Path
 
 from decouple import config, Csv
@@ -98,10 +99,15 @@ STATIC_URL = '/static/'
 AUTH_USER_MODEL = 'users.User'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=10),
+    'AUTH_HEADER_TYPES': ('jwt',),
+}
+
 API_KEY_LENGTH = 64
 API_KEY_HEADER_PARAM_NAME = 'API-KEY'
 PROJECT_UUID_HEADER_PARAM_NAME = 'PROJECT-ID'
-
 
 CORS_ORIGIN_ALLOW_ALL = config('CORS_ORIGIN_ALLOW_ALL', cast=bool, default=False)
 CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', cast=Csv(), default=',')
