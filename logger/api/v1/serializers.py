@@ -5,9 +5,9 @@ from django.utils.translation import ugettext_lazy as _
 
 
 class ComponentSerializer(serializers.Serializer):
-    component_id = serializers.SlugField(default='')
+    component_id = serializers.SlugField(default='', allow_blank=True)
     component_type = serializers.SlugField()
-    component_inner_text = serializers.CharField(default='')
+    component_inner_text = serializers.CharField(default='', allow_blank=True)
 
     def validate(self, attrs):
         if not attrs['component_id'] and not attrs['component_inner_text']:
