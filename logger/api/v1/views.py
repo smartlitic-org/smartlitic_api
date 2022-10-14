@@ -22,6 +22,7 @@ class LoggerBaseView(APIView):
         }
 
     def post(self, request):
+        print(request.data)
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
 
