@@ -75,3 +75,87 @@ Smartlitic APIs Documentation
       component_id -> (str of element's ID)
       component_inner_text -> (str of element's inner text)
   }
+
+
+- User Register 
+
+  URI: /users/v1/register/
+  METHOD: POST
+  CONTENT_TYPE: application/json
+  BODY:
+    *email -> (str)
+    *password -> (str)
+
+
+- User Login (get Token)
+
+  URI: /users/v1/token/
+  METHOD: POST
+  CONTENT_TYPE: application/json
+  BODY:
+    *email -> (str)
+    *password -> (str)
+
+
+- User Detail
+
+  URI: /users/v1/{user_id}/
+  METHOD: GET  
+  CONTENT_TYPE: application/json
+  HEADERS:
+    *Authorization -> jwt {JWT token}
+
+
+- Project List
+
+  URI: /users/v1/projects/
+  METHOD: GET  
+  CONTENT_TYPE: application/json
+  HEADERS:
+    *Authorization -> jwt {JWT token}
+
+
+- Project Create
+
+  URI: /users/v1/projects/
+  METHOD: POST
+  CONTENT_TYPE: application/json
+  HEADERS:
+    *Authorization -> jwt {JWT token}
+  BODY:
+    *name -> (str)
+    description -> (str) default: ''
+    website -> (str) default: ''
+    is_enable -> (bool) default: True
+
+
+- Project Get
+
+  URI: /users/v1/projects/{project_id}/  --> warning: this is id field not `project_uuid`
+  METHOD: GET
+  CONTENT_TYPE: application/json
+  HEADERS:
+    *Authorization -> jwt {JWT token}
+
+
+- Project Update
+
+  URI: /users/v1/projects/{project_id}/  --> warning: this is id field not `project_uuid`
+  METHOD: PUT/PATCH
+  CONTENT_TYPE: application/json
+  HEADERS:
+    *Authorization -> jwt {JWT token}
+  BODY:
+    name -> (str)
+    description -> (str)
+    website -> (str)
+    is_enable -> (bool)
+
+
+- Project Delete
+
+  URI: /users/v1/projects/{project_id}/  --> warning: this is id field not `project_uuid`
+  METHOD: DELETE
+  CONTENT_TYPE: application/json
+  HEADERS:
+    *Authorization -> jwt {JWT token}
