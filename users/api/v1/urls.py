@@ -2,10 +2,9 @@ from django.urls import path
 
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
-    TokenRefreshView,
 )
 
-from .views import UserRegisterView, UserDetailView, ProjectListView, ProjectDetailView
+from .views import UserRegisterView, UserDetailView, ProjectListView, ProjectDetailView, CustomTokenObtainPairView
 
 
 urlpatterns = [
@@ -15,5 +14,5 @@ urlpatterns = [
     path('projects/', ProjectListView.as_view(), name='project-list'),
     path('projects/<int:pk>/', ProjectDetailView.as_view(), name='project-list'),
 
-    path('token/', TokenObtainPairView.as_view(), name='token-obtain-pair'),
+    path('token/', CustomTokenObtainPairView.as_view(), name='token-obtain-pair'),
 ]

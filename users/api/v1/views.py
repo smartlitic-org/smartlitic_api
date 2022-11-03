@@ -1,3 +1,5 @@
+import jwt
+
 from rest_framework.generics import (
     CreateAPIView,
     ListCreateAPIView,
@@ -5,13 +7,23 @@ from rest_framework.generics import (
     RetrieveUpdateDestroyAPIView,
 )
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import IsAuthenticated
 
 from django.contrib.auth import get_user_model
+from django.conf import settings
 
 from users.models import Project
 
 from .serializers import UserSerializer, ProjectSerializer
+
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        access_token = response.data['access']
+        response.data['user_id'] = jwt.decode(access_token, settings.SECRET_KEY, 'HS256')['user_id']
+        return response
 
 
 class UserRegisterView(CreateAPIView):
