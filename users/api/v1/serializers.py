@@ -1,10 +1,12 @@
+from uuid import uuid4
+
 from rest_framework import serializers
 
 from django.utils.translation import ugettext_lazy as _
 from django.utils.text import slugify
 from django.contrib.auth import get_user_model
 
-from users.models import Project
+from users.models import Project, APIKey
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -52,3 +54,17 @@ class ProjectSerializer(serializers.ModelSerializer):
                 slug=slugify(name),
             )
         return super().update(instance, validated_data)
+
+
+class APIKeySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = APIKey
+        fields = ['id', 'api_key', 'is_revoked', 'created_time']
+        read_only_fields = ['id', 'api_key', 'is_revoked', 'created_time']
+
+    def create(self, validated_data):
+        validated_data.update(
+            user=self.context['user'],
+            api_key=str(uuid4()),
+        )
+        return super().create(validated_data)

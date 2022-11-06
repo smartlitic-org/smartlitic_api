@@ -4,6 +4,7 @@ from rest_framework.generics import (
     CreateAPIView,
     ListCreateAPIView,
     RetrieveUpdateAPIView,
+    RetrieveDestroyAPIView,
     RetrieveUpdateDestroyAPIView,
 )
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -13,7 +14,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import get_user_model
 from django.conf import settings
 
-from users.models import Project
+from users.models import APIKey, Project
 
 from .serializers import UserSerializer, ProjectSerializer
 
@@ -56,6 +57,28 @@ class ProjectDetailView(RetrieveUpdateDestroyAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     serializer_class = ProjectSerializer
+
+    def get_queryset(self):
+        return Project.available_objects.filter(user=self.request.user)
+
+
+class APIKeyListView(ListCreateAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = ''
+
+    def perform_create(self, serializer):
+        serializer.context['user'] = self.request.user
+        return super().perform_create(serializer)
+
+    def get_queryset(self):
+        return APIKey.available_objects.filter(user=self.request.user)
+
+
+class APIKeytDetailView(RetrieveDestroyAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = ''
 
     def get_queryset(self):
         return Project.available_objects.filter(user=self.request.user)
