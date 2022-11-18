@@ -8,7 +8,6 @@ Smartlitic APIs Documentation
   CONTENT_TYPE: application/json
   HEADERS:
     *API-KEY -> (str)
-    *PROJECT-ID -> (str of uuid)
   BODY:
     *client_uuid -> Client Fingerprint ID (str)
     *client_timestamp -> (int)
@@ -45,7 +44,6 @@ Smartlitic APIs Documentation
   CONTENT_TYPE: application/json
   HEADERS:
     *API-KEY -> (str)
-    *PROJECT-ID -> (str of uuid)
   BODY:
     *client_uuid -> Client Fingerprint ID (str)
     *client_timestamp -> (int)
@@ -131,7 +129,7 @@ Smartlitic APIs Documentation
 
 - Project Get
 
-  URI: /users/v1/projects/{project_id}/  --> warning: this is id field not `project_uuid`
+  URI: /users/v1/projects/{project_id}/
   METHOD: GET
   CONTENT_TYPE: application/json
   HEADERS:
@@ -140,7 +138,7 @@ Smartlitic APIs Documentation
 
 - Project Update
 
-  URI: /users/v1/projects/{project_id}/  --> warning: this is id field not `project_uuid`
+  URI: /users/v1/projects/{project_id}/
   METHOD: PUT/PATCH
   CONTENT_TYPE: application/json
   HEADERS:
@@ -154,8 +152,17 @@ Smartlitic APIs Documentation
 
 - Project Delete
 
-  URI: /users/v1/projects/{project_id}/  --> warning: this is id field not `project_uuid`
+  URI: /users/v1/projects/{project_id}/
   METHOD: DELETE
+  CONTENT_TYPE: application/json
+  HEADERS:
+    *Authorization -> jwt {JWT token}
+
+
+- API-KEY List
+
+  URI: /users/v1/api-keys/
+  METHOD: GET  
   CONTENT_TYPE: application/json
   HEADERS:
     *Authorization -> jwt {JWT token}
