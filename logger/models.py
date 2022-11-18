@@ -13,8 +13,7 @@ from elasticsearch_dsl import (
 
 class LoggerModel(Document):
     user_id = Keyword()
-    project_uuid = Keyword()
-    project_slug = Keyword()
+    project_id = Keyword()
     absolute_uri = Text()
     event_type = Keyword()
     log_type = Keyword()
@@ -44,7 +43,7 @@ class LoggerModel(Document):
 
     def save(self, **kwargs):
         self.created_time = timezone.now()
-        kwargs['index'] = f'smartlitic_logs-{self.user_id}-{self.project_uuid}'
+        kwargs['index'] = f'smartlitic_logs-{self.user_id}-{self.project_id}'
         return super().save(**kwargs)
     
     class Index:

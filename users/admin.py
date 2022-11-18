@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 from django.utils.translation import ugettext_lazy as _
 
-from .models import User, APIKey, Project
+from .models import User, Project
 
 
 @admin.register(User)
@@ -27,12 +27,6 @@ class UserAdmin(DjangoUserAdmin):
 
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
-    list_display = ['id', 'project_uuid', 'user', 'slug', 'name', 'is_enable']
+    list_display = ['id', 'api_key', 'user', 'slug', 'name', 'is_enable']
     prepopulated_fields = {'slug': ['name']}
-    search_fields = ['project_uuid', 'slug']
-
-
-@admin.register(APIKey)
-class APIKeyAdmin(admin.ModelAdmin):
-    list_display = ['id', 'user', 'api_key', 'is_revoked']
-    search_fields = ['api_key']
+    search_fields = ['api_key', 'slug']

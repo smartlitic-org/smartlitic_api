@@ -1,12 +1,11 @@
-from uuid import uuid4
-
 from rest_framework import serializers
 
 from django.utils.translation import ugettext_lazy as _
 from django.utils.text import slugify
 from django.contrib.auth import get_user_model
 
-from users.models import Project, APIKey
+from users.models import Project
+from utils.utils import generate_api_key
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -23,6 +22,7 @@ class UserSerializer(serializers.ModelSerializer):
         user = get_user_model().objects.create_user(**validated_data)
         user.set_password(password)
         user.save()
+        # TODO: create KibanaAccess object in here
         return user
 
     def update(self, instance, validated_data):
@@ -37,13 +37,14 @@ class UserSerializer(serializers.ModelSerializer):
 class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
-        fields = ['id', 'project_uuid', 'name', 'slug', 'description', 'website', 'is_enable']
-        read_only_fields = ['id', 'project_uuid', 'slug']
+        fields = ['id', 'name', 'description', 'website', 'is_enable']
+        read_only_fields = ['id']
 
     def create(self, validated_data):
         validated_data.update(
             user=self.context['user'],
             slug=slugify(validated_data['name'], allow_unicode=True),
+            api_key=generate_api_key(),
         )
         return super().create(validated_data)
 
@@ -58,13 +59,6 @@ class ProjectSerializer(serializers.ModelSerializer):
 
 class APIKeySerializer(serializers.ModelSerializer):
     class Meta:
-        model = APIKey
-        fields = ['id', 'api_key', 'is_revoked', 'created_time']
-        read_only_fields = ['id', 'api_key', 'is_revoked', 'created_time']
-
-    def create(self, validated_data):
-        validated_data.update(
-            user=self.context['user'],
-            api_key=str(uuid4()),
-        )
-        return super().create(validated_data)
+        model = Project
+        fields = ['id', 'name', 'api_key', 'is_enable']
+        read_only_fields = ['id', 'name', 'api_key', 'is_enable']

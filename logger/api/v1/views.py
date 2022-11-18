@@ -16,13 +16,11 @@ class LoggerBaseView(APIView):
     def extra_params(self, request):
         return {
             'user_id': request.user.id,
-            'project_uuid': request.auth.project_uuid,
-            'project_slug': request.auth.slug,
+            'project_id': request.auth.id,
             'event_type': self.event_type,
         }
 
     def post(self, request):
-        print(request.data)
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
 
