@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     
     'users.apps.UsersConfig',
     'logger.apps.LoggerConfig',
+    'dashboard.apps.DashboardConfig',
 ]
 
 MIDDLEWARE = [
