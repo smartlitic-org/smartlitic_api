@@ -157,6 +157,7 @@ class DashboardGeneralView(APIView):
         return {
             'total_clicks': visitors_query.count(),
             'unique_visitors': len(unique_visitors['data']),
+            # TODO: add two other metrics (avg_user_raiting, max_user_raiting)
         }
 
     def get(self, request, project_id):
