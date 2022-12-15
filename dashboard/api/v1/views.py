@@ -6,6 +6,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from elasticsearch.exceptions import NotFoundError
 from elasticsearch_dsl import Search, A
 
+from logger.models import LoggerModel
 from users.permissions import IsProjectBelongToUser
 from utils.connectors import ElasticsearchConnector
 
@@ -17,7 +18,7 @@ class ComponentsListView(APIView):
     permission_classes = [IsAuthenticated & IsProjectBelongToUser]
 
     def get(self, request, project_id):
-        index = f'smartlitic_logs-{request.user.id}-{project_id}'
+        index = LoggerModel.get_index_name(request.user.id, project_id)
         search_query = Search(using=elasticsearch_connector.get_connection(), index=index)
         search_query = search_query.filter('term', project_id=project_id)
         search_query = search_query.exclude('term', component_id='')
