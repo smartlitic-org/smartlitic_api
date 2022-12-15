@@ -25,6 +25,7 @@ elasticsearch_connector = ElasticsearchConnector()
 class ComponentsListView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated & IsProjectBelongToUser]
+    serializer_class = None
 
     def get(self, request, project_id):
         index = LoggerModel.get_index_name(request.user.id, project_id)
@@ -138,8 +139,11 @@ class DashboardBaseView(APIView):
         search_query.aggs.bucket('group_by', group_by_day)
 
         chart_dict_data: dict = self.generate_chart_data(search_query, dict_response=True)
-        convert_kwargs = {}
 
+        if not chart_dict_data['data']:
+            return chart_dict_data
+
+        convert_kwargs = {}
         if report_type == 'today':
             now_hour = timezone.now().hour
             for hour in range(0, now_hour + 1):
@@ -173,10 +177,12 @@ class DashboardBaseView(APIView):
         client_uuids = A('terms', field='client_uuid')
         visitors_query.aggs.bucket('group_by', client_uuids)
         unique_visitors = self.generate_chart_data(visitors_query)
+        unique_visitors = len(unique_visitors['data'])
         return {
-            'total_clicks': visitors_query.count(),
-            'unique_visitors': len(unique_visitors['data']),
-            # TODO: add two other metrics (avg_user_raiting, max_user_raiting)
+            'total_clicks': visitors_query.count() if unique_visitors else 0,
+            'unique_visitors': unique_visitors,
+            'avg_user_rating': 0,
+            'max_user_rating': 0,
         }
 
     def get(self, request, project_id):
