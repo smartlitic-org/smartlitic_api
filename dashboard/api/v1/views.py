@@ -17,7 +17,7 @@ from logger.models import LoggerModel
 from users.permissions import IsProjectBelongToUser
 from utils.connectors import ElasticsearchConnector
 
-from .serializers import DashboardGeneralSerializer
+from .serializers import DashboardGeneralSerializer, DashboardComponentSerializer
 
 elasticsearch_connector = ElasticsearchConnector()
 
@@ -41,10 +41,9 @@ class ComponentsListView(APIView):
         return Response([item.key for item in result.aggregations.unique_components.buckets])
 
 
-class DashboardGeneralView(APIView):
+class DashboardBaseView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated & IsProjectBelongToUser]
-    serializer_class = DashboardGeneralSerializer
 
     @staticmethod
     def convert_dict_to_chart_data(chart_dict_data, datetime_sort=False):
@@ -97,27 +96,40 @@ class DashboardGeneralView(APIView):
             chart_dict_data[chart_data['labels'][index]] = chart_data['data'][index]
         return chart_dict_data
 
-    def create_session_device_chart(self, user_id, project_id, index_name, start_time, end_time):
-        search_query = self.generate_search_query(user_id, project_id, index_name,
-                                                  start_time, end_time, 'LOAD_COMPLETE', 'GENERAL')
+    def create_session_device_chart(self, user_id, project_id, index_name, start_time, end_time, log_type):
+        search_query = self.generate_search_query(
+            user_id,
+            project_id,
+            index_name,
+            start_time,
+            end_time,
+            'LOAD_COMPLETE',
+            log_type
+        )
         client_device_types = A('terms', field='client_device_type')
         search_query.aggs.bucket('group_by', client_device_types)
         return self.generate_chart_data(search_query)
 
-    def create_audience_overview_chart(self, user_id, project_id, index_name, report_type, start_time, end_time):
-        search_query = self.generate_search_query(user_id, project_id, index_name,
-                                                  start_time, end_time, 'LOAD_COMPLETE', 'GENERAL')
+    def create_audience_overview_chart(self, user_id, project_id, index_name,
+                                       report_type, start_time, end_time, log_type):
+        search_query = self.generate_search_query(
+            user_id,
+            project_id,
+            index_name,
+            start_time,
+            end_time,
+            'LOAD_COMPLETE',
+            log_type
+        )
         if report_type == 'today':
             aggregate_params = {
                 'field': 'created_time',
-                'time_zone': 'Asia/Tehran',
                 'interval': 'hour',
                 'format': 'k',
             }
         else:
             aggregate_params = {
                 'field': 'created_time',
-                'time_zone': 'Asia/Tehran',
                 'interval': 'day',
                 'format': 'yyy-MM-dd',
             }
@@ -148,9 +160,16 @@ class DashboardGeneralView(APIView):
 
         return self.convert_dict_to_chart_data(chart_dict_data, **convert_kwargs)
 
-    def create_numeric_metrics_data(self, user_id, project_id, index_name, start_time, end_time):
-        visitors_query = self.generate_search_query(user_id, project_id, index_name,
-                                                    start_time, end_time, 'LOAD_COMPLETE', 'GENERAL')
+    def create_numeric_metrics_data(self, user_id, project_id, index_name, start_time, end_time, log_type):
+        visitors_query = self.generate_search_query(
+            user_id,
+            project_id,
+            index_name,
+            start_time,
+            end_time,
+            'LOAD_COMPLETE',
+            log_type
+        )
         client_uuids = A('terms', field='client_uuid')
         visitors_query.aggs.bucket('group_by', client_uuids)
         unique_visitors = self.generate_chart_data(visitors_query)
@@ -164,6 +183,8 @@ class DashboardGeneralView(APIView):
         serializer = self.serializer_class(data=request.query_params)
         serializer.is_valid(raise_exception=True)
 
+        log_type = 'GENERAL' if not serializer.validated_data.get('component') else 'COMPONENT'
+
         report_type = serializer.validated_data['report_type']
         if report_type == 'today':
             start_time = timezone.now().date()
@@ -176,13 +197,21 @@ class DashboardGeneralView(APIView):
         logger_index = LoggerModel.get_index_name(user_id, project_id)
         result = {
             'sessions_device': self.create_session_device_chart(
-                user_id, project_id, logger_index, start_time, end_time
+                user_id, project_id, logger_index, start_time, end_time, log_type
             ),
             'audience_overview': self.create_audience_overview_chart(
-                user_id, project_id, logger_index, report_type, start_time, end_time
+                user_id, project_id, logger_index, report_type, start_time, end_time, log_type
             ),
             'numeric_metrics': self.create_numeric_metrics_data(
-                user_id, project_id, logger_index, start_time, end_time
+                user_id, project_id, logger_index, start_time, end_time, log_type
             ),
         }
         return Response(result)
+
+
+class DashboardGeneralView(DashboardBaseView):
+    serializer_class = DashboardGeneralSerializer
+
+
+class DashboardComponentsView(DashboardBaseView):
+    serializer_class = DashboardComponentSerializer
