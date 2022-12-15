@@ -154,11 +154,10 @@ class DashboardGeneralView(APIView):
         client_uuids = A('terms', field='client_uuid')
         visitors_query.aggs.bucket('group_by', client_uuids)
         unique_visitors = self.generate_chart_data(visitors_query)
-        self.data_ = {
+        return {
             'total_clicks': visitors_query.count(),
             'unique_visitors': len(unique_visitors['data']),
         }
-        return self.data_
 
     def get(self, request, project_id):
         serializer = self.serializer_class(data=request.query_params)
