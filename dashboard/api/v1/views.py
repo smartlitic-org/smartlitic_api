@@ -148,6 +148,18 @@ class DashboardGeneralView(APIView):
 
         return self.convert_dict_to_chart_data(chart_dict_data, **convert_kwargs)
 
+    def create_numeric_metrics_data(self, user_id, project_id, index_name, start_time, end_time):
+        visitors_query = self.generate_search_query(user_id, project_id, index_name,
+                                                    start_time, end_time, 'LOAD_COMPLETE', 'GENERAL')
+        client_uuids = A('terms', field='client_uuid')
+        visitors_query.aggs.bucket('group_by', client_uuids)
+        unique_visitors = self.generate_chart_data(visitors_query)
+        self.data_ = {
+            'total_clicks': visitors_query.count(),
+            'unique_visitors': len(unique_visitors['data']),
+        }
+        return self.data_
+
     def get(self, request, project_id):
         serializer = self.serializer_class(data=request.query_params)
         serializer.is_valid(raise_exception=True)
@@ -168,6 +180,9 @@ class DashboardGeneralView(APIView):
             ),
             'audience_overview': self.create_audience_overview_chart(
                 user_id, project_id, logger_index, report_type, start_time, end_time
-            )
+            ),
+            'numeric_metrics': self.create_numeric_metrics_data(
+                user_id, project_id, logger_index, start_time, end_time
+            ),
         }
         return Response(result)
