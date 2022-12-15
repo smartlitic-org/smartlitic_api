@@ -41,6 +41,10 @@ class LoggerModel(Document):
     client_timezone_offset = Float()
     client_timestamp = Long()
 
+    @staticmethod
+    def get_index_name(user_id, project_id):
+        return f'smartlitic_logs-{user_id}-{project_id}'
+
     def save(self, **kwargs):
         self.created_time = timezone.now()
         kwargs['index'] = f'smartlitic_logs-{self.user_id}-{self.project_id}'
