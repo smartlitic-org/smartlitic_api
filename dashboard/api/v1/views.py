@@ -81,7 +81,7 @@ class DashboardBaseView(APIView):
         try:
             result = elasticsearch_search_query.execute()
         except NotFoundError:
-            return chart_data
+            return chart_data if not dict_response else {}
         for bucket in result.aggregations.group_by.buckets:
             if hasattr(bucket, 'key_as_string'):
                 chart_data['labels'].append(bucket.key_as_string)
@@ -140,8 +140,8 @@ class DashboardBaseView(APIView):
 
         chart_dict_data: dict = self.generate_chart_data(search_query, dict_response=True)
 
-        if not chart_dict_data['data']:
-            return chart_dict_data
+        if not chart_dict_data:
+            return {'labels': [], 'data': []}
 
         convert_kwargs = {}
         if report_type == 'today':
