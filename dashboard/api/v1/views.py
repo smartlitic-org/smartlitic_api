@@ -25,7 +25,6 @@ elasticsearch_connector = ElasticsearchConnector()
 class ComponentsListView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated & IsProjectBelongToUser]
-    serializer_class = None
 
     def get(self, request, project_id):
         index = LoggerModel.get_index_name(request.user.id, project_id)
