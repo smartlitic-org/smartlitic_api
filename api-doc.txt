@@ -166,3 +166,43 @@ Smartlitic APIs Documentation
   CONTENT_TYPE: application/json
   HEADERS:
     *Authorization -> jwt {JWT token}
+
+
+- Components List
+
+  URI: /dashboard/v1/components/{project_id}/
+  METHOD: GET
+  CONTENT_TYPE: application/json
+  HEADERS:
+    *Authorization -> jwt {JWT token}
+
+
+- Dashboard General View
+
+  URI: /dashboard/v1/general-view/{project_id}/
+  METHOD: GET
+  CONTENT_TYPE: application/json
+  HEADERS:
+    *Authorization -> jwt {JWT token}
+  QUERY_PARAMS:
+    report_type -> (str of choices) choices are [custom/today] default: today
+    report_from -> (str of date) required format is: YYYY-MM-DD example: 2022-12-16
+    report_until -> (str of date) required format is: YYYY-MM-DD example: 2022-12-16
+  NOTES:
+    -In case `report_type` equals to `custom`, `report_from` and `report_until` should have set
+
+
+- Dashboard Component View
+
+  URI: /dashboard/v1/components-view/{project_id}/
+  METHOD: GET
+  CONTENT_TYPE: application/json
+  HEADERS:
+    *Authorization -> jwt {JWT token}
+  QUERY_PARAMS:
+    *component -> (str of component)
+    report_type -> (str of choices) choices are [custom/today] default: today
+    report_from -> (str of date) required format is: YYYY-MM-DD example: 2022-12-16
+    report_until -> (str of date) required format is: YYYY-MM-DD example: 2022-12-16
+  NOTES:
+    -In case `report_type` equals to `custom`, `report_from` and `report_until` should have set
