@@ -72,7 +72,7 @@ class DashboardBaseView(APIView):
         return search_query
 
     @staticmethod
-    def generate_chart_data(elasticsearch_search_query, dict_response=False):
+    def generate_chart_data(elasticsearch_search_query, dict_response=False, return_aggregation_result=False):
         chart_data = {
             'labels': [],
             'data': [],
@@ -81,6 +81,8 @@ class DashboardBaseView(APIView):
             result = elasticsearch_search_query.execute()
         except NotFoundError:
             return chart_data if not dict_response else {}
+        if return_aggregation_result:
+            return result.aggregations.group_by.value
         for bucket in result.aggregations.group_by.buckets:
             if hasattr(bucket, 'key_as_string'):
                 chart_data['labels'].append(bucket.key_as_string)
@@ -188,11 +190,38 @@ class DashboardBaseView(APIView):
         visitors_query.aggs.bucket('group_by', client_uuids)
         unique_visitors = self.generate_chart_data(visitors_query)
         unique_visitors = len(unique_visitors['data'])
+
+        avg_user_rating_query = self.generate_search_query(
+            user_id,
+            project_id,
+            index_name,
+            start_time,
+            end_time,
+            'RATE',
+            log_type
+        )
+        avg_user_rating = A('avg', field='client_rate', missing=0)
+        avg_user_rating_query.aggs.bucket('group_by', avg_user_rating)
+        avg_user_rating_result = self.generate_chart_data(avg_user_rating_query, return_aggregation_result=True)
+
+        max_user_rating_query = self.generate_search_query(
+            user_id,
+            project_id,
+            index_name,
+            start_time,
+            end_time,
+            'RATE',
+            log_type
+        )
+        max_user_rating = A('max', field='client_rate', missing=0)
+        max_user_rating_query.aggs.bucket('group_by', max_user_rating)
+        max_user_rating_result = self.generate_chart_data(max_user_rating_query, return_aggregation_result=True)
+
         return {
             'total_clicks': visitors_query.count() if unique_visitors else 0,
             'unique_visitors': unique_visitors,
-            'avg_user_rating': 0,
-            'max_user_rating': 0,
+            'avg_user_rating': f'{avg_user_rating_result:.2f}',
+            'max_user_rating': f'{max_user_rating_result:.2f}',
         }
 
     def create_comments_data(self, user_id, project_id, index_name, start_time, end_time, log_type):
