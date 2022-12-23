@@ -96,6 +96,17 @@ class DashboardBaseView(APIView):
             chart_dict_data[chart_data['labels'][index]] = chart_data['data'][index]
         return chart_dict_data
 
+    @staticmethod
+    def generate_raw_data(elasticsearch_search_query):
+        raw_data = []
+        try:
+            result = elasticsearch_search_query.execute()
+        except NotFoundError:
+            return raw_data
+        for item in result.hits.hits:
+            raw_data.append(item._source.client_comment)
+        return raw_data
+
     def create_session_device_chart(self, user_id, project_id, index_name, start_time, end_time, log_type):
         search_query = self.generate_search_query(
             user_id,
@@ -184,6 +195,19 @@ class DashboardBaseView(APIView):
             'max_user_rating': 0,
         }
 
+    def create_comments_data(self, user_id, project_id, index_name, start_time, end_time, log_type):
+        search_query = self.generate_search_query(
+            user_id,
+            project_id,
+            index_name,
+            start_time,
+            end_time,
+            'RATE',
+            log_type
+        )
+        search_query = search_query.exclude('term', client_comment='')
+        return self.generate_raw_data(search_query)
+
     def get(self, request, project_id):
         serializer = self.serializer_class(data=request.query_params)
         serializer.is_valid(raise_exception=True)
@@ -211,6 +235,10 @@ class DashboardBaseView(APIView):
                 user_id, project_id, logger_index, start_time, end_time, log_type
             ),
         }
+        if log_type == 'COMPONENT':
+            result['comments'] = self.create_comments_data(
+                user_id, project_id, logger_index, start_time, end_time, log_type
+            )
         return Response(result)
 
 
