@@ -62,13 +62,17 @@ class DashboardBaseView(APIView):
         return chart_data
 
     @staticmethod
-    def generate_search_query(user_id, project_id, index_name, start_time, end_time, event_type, log_type):
+    def generate_search_query(user_id, project_id, index_name, start_time, end_time, event_type, log_type, component):
         search_query = Search(using=elasticsearch_connector.get_connection(), index=index_name)
         search_query = search_query.filter('term', user_id=user_id)
         search_query = search_query.filter('term', project_id=project_id)
         search_query = search_query.filter('term', event_type=event_type)
         search_query = search_query.filter('term', log_type=log_type)
         search_query = search_query.filter('range', created_time={'gte': start_time, 'lt': end_time})
+
+        if component:
+            search_query = search_query.filter('term', component_id=component)
+
         return search_query
 
     @staticmethod
@@ -80,7 +84,7 @@ class DashboardBaseView(APIView):
         try:
             result = elasticsearch_search_query.execute()
         except NotFoundError:
-            return chart_data if not dict_response else {}
+            return 0 if return_aggregation_result else {} if dict_response else chart_data
         if return_aggregation_result:
             return result.aggregations.group_by.value
         for bucket in result.aggregations.group_by.buckets:
@@ -109,7 +113,7 @@ class DashboardBaseView(APIView):
             raw_data.append(item._source.client_comment)
         return raw_data
 
-    def create_session_device_chart(self, user_id, project_id, index_name, start_time, end_time, log_type):
+    def create_session_device_chart(self, user_id, project_id, index_name, start_time, end_time, log_type, component):
         search_query = self.generate_search_query(
             user_id,
             project_id,
@@ -117,14 +121,15 @@ class DashboardBaseView(APIView):
             start_time,
             end_time,
             'LOAD_COMPLETE',
-            log_type
+            log_type,
+            component
         )
         client_device_types = A('terms', field='client_device_type')
         search_query.aggs.bucket('group_by', client_device_types)
         return self.generate_chart_data(search_query)
 
-    def create_audience_overview_chart(self, user_id, project_id, index_name,
-                                       report_type, start_time, end_time, log_type):
+    def create_audience_overview_chart(self, user_id, project_id, index_name, report_type,
+                                       start_time, end_time, log_type, component):
         search_query = self.generate_search_query(
             user_id,
             project_id,
@@ -132,17 +137,20 @@ class DashboardBaseView(APIView):
             start_time,
             end_time,
             'LOAD_COMPLETE',
-            log_type
+            log_type,
+            component
         )
         if report_type == 'today':
             aggregate_params = {
                 'field': 'created_time',
+                'time_zone': 'Asia/Tehran',
                 'interval': 'hour',
                 'format': 'k',
             }
         else:
             aggregate_params = {
                 'field': 'created_time',
+                'time_zone': 'Asia/Tehran',
                 'interval': 'day',
                 'format': 'yyy-MM-dd',
             }
@@ -176,7 +184,7 @@ class DashboardBaseView(APIView):
 
         return self.convert_dict_to_chart_data(chart_dict_data, **convert_kwargs)
 
-    def create_numeric_metrics_data(self, user_id, project_id, index_name, start_time, end_time, log_type):
+    def create_numeric_metrics_data(self, user_id, project_id, index_name, start_time, end_time, log_type, component):
         visitors_query = self.generate_search_query(
             user_id,
             project_id,
@@ -184,7 +192,8 @@ class DashboardBaseView(APIView):
             start_time,
             end_time,
             'LOAD_COMPLETE',
-            log_type
+            log_type,
+            component
         )
         client_uuids = A('terms', field='client_uuid')
         visitors_query.aggs.bucket('group_by', client_uuids)
@@ -198,11 +207,12 @@ class DashboardBaseView(APIView):
             start_time,
             end_time,
             'RATE',
-            log_type
+            log_type,
+            component
         )
         avg_user_rating = A('avg', field='client_rate', missing=0)
         avg_user_rating_query.aggs.bucket('group_by', avg_user_rating)
-        avg_user_rating_result = self.generate_chart_data(avg_user_rating_query, return_aggregation_result=True)
+        avg_user_rating_result = self.generate_chart_data(avg_user_rating_query, return_aggregation_result=True) or 0
 
         max_user_rating_query = self.generate_search_query(
             user_id,
@@ -211,11 +221,12 @@ class DashboardBaseView(APIView):
             start_time,
             end_time,
             'RATE',
-            log_type
+            log_type,
+            component
         )
         max_user_rating = A('max', field='client_rate', missing=0)
         max_user_rating_query.aggs.bucket('group_by', max_user_rating)
-        max_user_rating_result = self.generate_chart_data(max_user_rating_query, return_aggregation_result=True)
+        max_user_rating_result = self.generate_chart_data(max_user_rating_query, return_aggregation_result=True) or 0
 
         return {
             'total_clicks': visitors_query.count() if unique_visitors else 0,
@@ -224,7 +235,7 @@ class DashboardBaseView(APIView):
             'max_user_rating': f'{max_user_rating_result:.2f}',
         }
 
-    def create_comments_data(self, user_id, project_id, index_name, start_time, end_time, log_type):
+    def create_comments_data(self, user_id, project_id, index_name, start_time, end_time, log_type, component):
         search_query = self.generate_search_query(
             user_id,
             project_id,
@@ -232,7 +243,8 @@ class DashboardBaseView(APIView):
             start_time,
             end_time,
             'RATE',
-            log_type
+            log_type,
+            component
         )
         search_query = search_query.exclude('term', client_comment='')
         return self.generate_raw_data(search_query)
@@ -241,7 +253,10 @@ class DashboardBaseView(APIView):
         serializer = self.serializer_class(data=request.query_params)
         serializer.is_valid(raise_exception=True)
 
-        log_type = 'GENERAL' if not serializer.validated_data.get('component') else 'COMPONENT'
+        log_type = 'GENERAL'
+        component = serializer.validated_data.get('component')
+        if component:
+            log_type = 'COMPONENT'
 
         report_type = serializer.validated_data['report_type']
         if report_type == 'today':
@@ -255,18 +270,18 @@ class DashboardBaseView(APIView):
         logger_index = LoggerModel.get_index_name(user_id, project_id)
         result = {
             'sessions_device': self.create_session_device_chart(
-                user_id, project_id, logger_index, start_time, end_time, log_type
+                user_id, project_id, logger_index, start_time, end_time, log_type, component=component
             ),
             'audience_overview': self.create_audience_overview_chart(
-                user_id, project_id, logger_index, report_type, start_time, end_time, log_type
+                user_id, project_id, logger_index, report_type, start_time, end_time, log_type, component=component
             ),
             'numeric_metrics': self.create_numeric_metrics_data(
-                user_id, project_id, logger_index, start_time, end_time, log_type
+                user_id, project_id, logger_index, start_time, end_time, log_type, component=component
             ),
         }
         if log_type == 'COMPONENT':
             result['comments'] = self.create_comments_data(
-                user_id, project_id, logger_index, start_time, end_time, log_type
+                user_id, project_id, logger_index, start_time, end_time, log_type, component=component
             )
         return Response(result)
 
