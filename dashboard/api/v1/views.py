@@ -103,14 +103,17 @@ class DashboardBaseView(APIView):
         return chart_dict_data
 
     @staticmethod
-    def generate_raw_data(elasticsearch_search_query):
+    def generate_raw_comments_data(elasticsearch_search_query):
         raw_data = []
         try:
             result = elasticsearch_search_query.execute()
         except NotFoundError:
             return raw_data
         for item in result.hits.hits:
-            raw_data.append(item._source.client_comment)
+            raw_data.append({
+                'comment': item._source.client_comment,
+                'rate': item._source.client_rate,
+            })
         return raw_data
 
     def create_session_device_chart(self, user_id, project_id, index_name, start_time, end_time, log_type, component):
@@ -247,7 +250,7 @@ class DashboardBaseView(APIView):
             component
         )
         search_query = search_query.exclude('term', client_comment='')
-        return self.generate_raw_data(search_query)
+        return self.generate_raw_comments_data(search_query)
 
     def get(self, request, project_id):
         serializer = self.serializer_class(data=request.query_params)
