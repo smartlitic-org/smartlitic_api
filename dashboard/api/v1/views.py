@@ -68,7 +68,14 @@ class DashboardBaseView(APIView):
         search_query = search_query.filter('term', project_id=project_id)
         search_query = search_query.filter('term', event_type=event_type)
         search_query = search_query.filter('term', log_type=log_type)
-        search_query = search_query.filter('range', created_time={'gte': start_time, 'lt': end_time})
+
+        range_filter = {}
+        if start_time:
+            range_filter['gte'] = start_time
+        if end_time:
+            range_filter['lte'] = end_time
+
+        search_query = search_query.filter('range', created_time=range_filter)
 
         if component:
             search_query = search_query.filter('term', component_id=component)
@@ -217,26 +224,64 @@ class DashboardBaseView(APIView):
         avg_user_rating_query.aggs.bucket('group_by', avg_user_rating)
         avg_user_rating_result = self.generate_chart_data(avg_user_rating_query, return_aggregation_result=True) or 0
 
-        max_user_rating_query = self.generate_search_query(
-            user_id,
-            project_id,
-            index_name,
-            start_time,
-            end_time,
-            'RATE',
-            log_type,
-            component
-        )
-        max_user_rating = A('max', field='client_rate', missing=0)
-        max_user_rating_query.aggs.bucket('group_by', max_user_rating)
-        max_user_rating_result = self.generate_chart_data(max_user_rating_query, return_aggregation_result=True) or 0
-
-        return {
-            'total_clicks': visitors_query.count() if unique_visitors else 0,
+        total_clicks = visitors_query.count() if unique_visitors else 0
+        result = {
+            'total_clicks': total_clicks,
             'unique_visitors': unique_visitors,
             'avg_user_rating': f'{avg_user_rating_result:.2f}',
-            'max_user_rating': f'{max_user_rating_result:.2f}',
         }
+
+        if component:
+            conversion_rate = unique_visitors / total_clicks if not total_clicks == 0 else 0
+            result['conversion_rate'] = f'{conversion_rate:.2f}',
+        else:
+            new_users = 0
+            if total_clicks != 0:
+                other_days_query = self.generate_search_query(
+                    user_id,
+                    project_id,
+                    index_name,
+                    None,
+                    start_time - datetime.timedelta(days=1),
+                    'LOAD_COMPLETE',
+                    log_type,
+                    component
+                )
+                other_days_data = other_days_query.execute()
+                other_days_per_day = {}
+                for data in other_days_data:
+                    date_str = data.created_time.split('T')[0]
+                    date_data = other_days_per_day.get(date_str, set())
+                    date_data.add(data.client_uuid)
+                    other_days_per_day[date_str] = date_data
+
+                report_data = self.generate_search_query(
+                    user_id,
+                    project_id,
+                    index_name,
+                    start_time,
+                    end_time,
+                    'LOAD_COMPLETE',
+                    log_type,
+                    component
+                )
+                report_data_query = report_data.execute()
+
+                report_users = set()
+                for data in report_data_query:
+                    report_users.add(data.client_uuid)
+
+                new_users = set()
+                if report_users:
+                    for report_user in report_users:
+                        for per_date_data in other_days_per_day.values():
+                            if report_user not in per_date_data:
+                                new_users.add(report_user)
+                new_users = len(new_users)
+
+            result['new_users'] = new_users
+
+        return result
 
     def create_comments_data(self, user_id, project_id, index_name, start_time, end_time, log_type, component):
         search_query = self.generate_search_query(
