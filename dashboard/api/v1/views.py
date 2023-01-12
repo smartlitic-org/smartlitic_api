@@ -271,15 +271,15 @@ class DashboardBaseView(APIView):
                 for data in report_data_query:
                     report_users.add(data.client_uuid)
 
-                new_users = set()
-                if report_users:
+                if not other_days_data:
+                    new_users = unique_visitors
+                elif report_users:
+                    new_users = set()
                     for report_user in report_users:
                         for per_date_data in other_days_per_day.values():
                             if report_user not in per_date_data:
                                 new_users.add(report_user)
                     new_users = len(new_users)
-                else:
-                    new_users = unique_visitors
 
             result['new_users'] = new_users
 
