@@ -277,7 +277,9 @@ class DashboardBaseView(APIView):
                         for per_date_data in other_days_per_day.values():
                             if report_user not in per_date_data:
                                 new_users.add(report_user)
-                new_users = len(new_users)
+                    new_users = len(new_users)
+                else:
+                    new_users = unique_visitors
 
             result['new_users'] = new_users
 
