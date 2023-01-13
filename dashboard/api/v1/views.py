@@ -298,6 +298,7 @@ class DashboardBaseView(APIView):
             component
         )
         search_query = search_query.exclude('term', client_comment='')
+        search_query = search_query.sort({'client_timestamp': {'order': 'desc'}})
         return self.generate_raw_comments_data(search_query)
 
     def get(self, request, project_id):
