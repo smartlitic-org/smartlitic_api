@@ -4,6 +4,7 @@ from collections import OrderedDict
 from dateutil.parser import parse
 
 from django.utils import timezone
+from django.conf import settings
 
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -247,7 +248,7 @@ class DashboardBaseView(APIView):
                     log_type,
                     component
                 )
-                other_days_data = other_days_query.execute()
+                other_days_data = other_days_query[:settings.ELASTICSEARCH_QUERY_SIZE].execute()
                 other_days_per_day = {}
                 for data in other_days_data:
                     date_str = data.created_time.split('T')[0]
@@ -265,7 +266,7 @@ class DashboardBaseView(APIView):
                     log_type,
                     component
                 )
-                report_data_query = report_data.execute()
+                report_data_query = report_data[:settings.ELASTICSEARCH_QUERY_SIZE].execute()
 
                 report_users = set()
                 for data in report_data_query:
