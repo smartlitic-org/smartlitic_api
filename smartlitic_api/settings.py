@@ -109,7 +109,7 @@ SIMPLE_JWT = {
 API_KEY_LENGTH = 64
 API_KEY_HEADER_PARAM_NAME = 'API-KEY'
 
-CORS_ORIGIN_ALLOW_ALL = config('CORS_ORIGIN_ALLOW_ALL', cast=bool, default=False)
+CORS_ORIGIN_ALLOW_ALL = config('CORS_ORIGIN_ALLOW_ALL', cast=bool, default=True)
 CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', cast=Csv(), default=',')
 CORS_ALLOW_HEADERS = list(default_headers) + [
     API_KEY_HEADER_PARAM_NAME,
