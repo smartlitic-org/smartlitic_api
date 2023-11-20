@@ -20,6 +20,7 @@ class LoggerBaseView(APIView):
             'event_type': self.event_type,
         }
 
+#adding a comment here
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
