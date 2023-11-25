@@ -36,7 +36,7 @@ class LoggerBaseView(APIView):
             del log_data['component']
 
         log = LoggerModel(**log_data)
-        log.save(using=elasticsearch_connector.get_connection())
+        # log.save(using=elasticsearch_connector.get_connection())
 
         return Response()
 

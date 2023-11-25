@@ -338,9 +338,141 @@ class DashboardBaseView(APIView):
         return Response(result)
 
 
-class DashboardGeneralView(DashboardBaseView):
-    serializer_class = DashboardGeneralSerializer
+class DashboardGeneralView(APIView):
+
+    def get(self, request, project_id):
+        numberic_result = {
+                'total_clicks': 2336,
+                'unique_visitors': 4705,
+                'avg_user_rating': 4.2,
+                 "new_users": 1830,
+            }
+        sessions_device_result = {
+            'labels': ["DESKTOP", "MOBILE"],
+            'data' : [1518,818]
+        }
+        audience_result =  {
+            "labels": [
+                "2023-10-26",
+                "2023-10-27",
+                "2023-10-28",
+                "2023-10-29",
+                "2023-10-30",
+                "2023-10-31",
+                "2023-11-01",
+                "2023-11-02",
+                "2023-11-03",
+                "2023-11-04",
+                "2023-11-05",
+                "2023-11-06",
+                "2023-11-07",
+                "2023-11-08",
+                "2023-11-09",
+                "2023-11-10",
+                "2023-11-11",
+                "2023-11-12",
+                "2023-11-13",
+                "2023-11-14",
+                "2023-11-15",
+                "2023-11-16",
+                "2023-11-17",
+                "2023-11-18",
+                "2023-11-19",
+                "2023-11-20",
+                "2023-11-21",
+                "2023-11-22",
+                "2023-11-23",
+                "2023-11-24",
+                "2023-11-25"
+            ],
+            "data":[73, 74, 90, 67, 80, 99, 87, 73, 81, 69, 61, 87, 76, 96, 82, 85, 61, 58, 100, 56, 81, 87, 84, 96, 74, 78, 87, 58, 53, 57]
+        }
+        result = {
+            'numeric_metrics': numberic_result,
+            'sessions_device': sessions_device_result,
+            'audience_overview': audience_result
+        }
+        return Response(result)
+    # serializer_class = DashboardGeneralSerializer
 
 
-class DashboardComponentsView(DashboardBaseView):
-    serializer_class = DashboardComponentSerializer
+# class DashboardComponentsView(DashboardBaseView):
+#     serializer_class = DashboardComponentSerializer
+
+class DashboardComponentsView(APIView):
+    def get(self, request, project_id):
+        numberic_result = {
+            "total_clicks": 658,
+            "unique_visitors": 1459,
+            "avg_user_rating": "3.8",
+            "conversion_rate": [
+                "45%"
+            ]
+        }
+        audience_result =  {
+            "labels": [
+                "2023-10-26",
+                "2023-10-27",
+                "2023-10-28",
+                "2023-10-29",
+                "2023-10-30",
+                "2023-10-31",
+                "2023-11-01",
+                "2023-11-02",
+                "2023-11-03",
+                "2023-11-04",
+                "2023-11-05",
+                "2023-11-06",
+                "2023-11-07",
+                "2023-11-08",
+                "2023-11-09",
+                "2023-11-10",
+                "2023-11-11",
+                "2023-11-12",
+                "2023-11-13",
+                "2023-11-14",
+                "2023-11-15",
+                "2023-11-16",
+                "2023-11-17",
+                "2023-11-18",
+                "2023-11-19",
+                "2023-11-20",
+                "2023-11-21",
+                "2023-11-22",
+                "2023-11-23",
+                "2023-11-24",
+                "2023-11-25"
+            ],
+            "data":[19, 28, 16, 24, 21, 29, 16, 20, 31, 11, 29, 13, 11, 19, 23, 18, 15, 24, 31, 18, 27, 11, 15, 27, 17, 12, 18, 14, 19, 24]
+        }
+        
+        comments_result = [
+            {
+                "comment": "it's ok but maybe highlight it more?",
+                "rate": 4
+            },
+            {
+                "comment": "nice button, easy to find",
+                "rate": 5
+            },
+            {
+                "comment": "I was looking for pricing section and couldn't find it",
+                "rate": 1
+            },
+            {
+                "comment": "I don't like the white color and blue backgroud",
+                "rate": 3
+            }
+        ]
+        sessions_device_result = {
+            'labels': ["DESKTOP", "MOBILE"],
+            'data' : [422,236]
+        }
+        result = {
+            'numeric_metrics': numberic_result,
+            'sessions_device': sessions_device_result,
+            "audience_overview": audience_result,
+            "comments": comments_result
+        }
+        return Response(result)
+

@@ -10,6 +10,7 @@ class ElasticsearchConnector(object):
         return cls.instance
 
     def __init__(self):
+        print(settings.ELASTICSEARCH_URL)
         self.connection = connections.create_connection(
             hosts=[settings.ELASTICSEARCH_URL],
             timeout=settings.ELASTICSEARCH_TIMEOUT,
